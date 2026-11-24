@@ -13,6 +13,13 @@ LOCATIONS = {
 }
 
 
+def _key() -> str:
+    try:
+        return str(st.secrets.get("INFLOW_KEY", "")).strip()
+    except Exception:
+        return ""
+
+
 def configured() -> bool:
     try:
         return bool(st.secrets.get("INFLOW_KEY")) and bool(st.secrets.get("INFLOW_COMPANY"))
@@ -20,7 +27,6 @@ def configured() -> bool:
         return False
 
 
-@st.cache_data(ttl=300, show_spinner=False)
 def get_order(order_number: str):
     """Return a dict with the fields the planner needs, or {'error': ...}."""
     if not configured():
@@ -28,8 +34,13 @@ def get_order(order_number: str):
     url = f"https://cloudapi.inflowinventory.com/{st.secrets['INFLOW_COMPANY']}/sales-orders"
     try:
         r = requests.get(url, params={"filter[orderNumber]": order_number.strip().upper(), "include": "lines.product"},
-                         headers={"Authorization": f"Bearer {st.secrets['INFLOW_KEY']}",
+                         headers={"Authorization": f"Bearer {_key()}",
                                   "Accept": f"application/json;version={VERSION}"}, timeout=20)
+        if r.status_code == 401:
+            k = _key()
+            return {"error": "inFlow rejected the API key (401). The saved INFLOW_KEY is "
+                             f"{len(k)} characters long and ends with '{k[-2:]}'. A full inFlow key is "
+                             "about 66 characters and ends with '-1'. Fix it in the app's Secrets."}
         r.raise_for_status()
         rows = r.json()
     except Exception as e:
