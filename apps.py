@@ -29,10 +29,10 @@ APPS = [
     },
     {
         "name": "Delivery Schedule",
-        "desc": "Automatically plans delivery dates, routes and trucks so drivers and sales always see the latest schedule.",
+        "desc": "Beta: enter an order and get the delivery dates that fit the route, with a recommended date and time slot.",
         "tags": ["Delivery", "Schedule"],
         "status": "build",
-        "url": "",
+        "url": "/Delivery_Planner",
         "icon": "📅",
     },
     {

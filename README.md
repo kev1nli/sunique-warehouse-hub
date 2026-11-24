@@ -10,6 +10,8 @@ Live: https://sunique-warehouse-app.streamlit.app/
 - `sops.py` – list of SOPs
 - `sops/` – SOP PDF files
 - `logo.png`, `favicon.png` – branding
+- `pages/Delivery_Planner.py` – in-town delivery planner (password protected)
+- `delivery_engine.py`, `delivery_geo.py`, `delivery_inflow.py` – planner logic, maps, inFlow lookup
 - `requirements.txt` – dependencies
 
 ## Add an SOP
@@ -19,3 +21,12 @@ Live: https://sunique-warehouse-app.streamlit.app/
 
 ## Add or update an app
 Edit `apps.py` and commit.
+
+## Delivery Planner secrets
+Set these in Streamlit Cloud → App settings → Secrets (never commit them):
+
+```
+APP_PASSWORD = "..."
+INFLOW_COMPANY = "..."
+INFLOW_KEY = "..."
+```
