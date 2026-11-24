@@ -1,10 +1,15 @@
+import base64
 import html
+from pathlib import Path
 
 import streamlit as st
 
 from apps import APPS
 
-st.set_page_config(page_title="Sunique Warehouse Hub", page_icon="🏭", layout="wide")
+st.set_page_config(page_title="Sunique Warehouse Hub", page_icon="favicon.png", layout="wide")
+
+BRAND = "#4E5B30"  # Sunique 主题绿
+LOGO_B64 = base64.b64encode((Path(__file__).parent / "logo.png").read_bytes()).decode()
 
 GROUPS = [
     ("live", "可以使用 Live"),
@@ -14,36 +19,60 @@ GROUPS = [
 LABEL = {"live": "可用", "build": "开发中", "plan": "规划中"}
 
 st.markdown(
-    """
+    f"""
 <style>
-.block-container {max-width: 1100px; padding-top: 2rem;}
-.hub-card {
-  border: 1px solid rgba(128,128,128,.25); border-left: 5px solid var(--stripe);
-  border-radius: 10px; padding: 16px 18px; height: 100%;
-  background: rgba(128,128,128,.04); display: flex; flex-direction: column; gap: 6px;
-}
-.hub-card.live {--stripe: #2e7d4f;} .hub-card.build {--stripe: #c27c0e;} .hub-card.plan {--stripe: #8a9299;}
-.hub-head {display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;}
-.hub-name {font-size: 1.1rem; font-weight: 600; line-height: 1.3;}
-.hub-zh {font-size: .85rem; opacity: .7;}
-.hub-icon {font-size: 1.6rem;}
-.hub-desc {font-size: .92rem; opacity: .8; margin: 4px 0;}
-.hub-tags span {font-size: .75rem; padding: 2px 8px; margin-right: 4px; border-radius: 4px;
-  border: 1px solid rgba(128,128,128,.3); opacity: .8;}
-.hub-foot {margin-top: auto; padding-top: 8px; display: flex; justify-content: space-between; align-items: center; font-size: .9rem;}
-.hub-foot a {font-weight: 600; text-decoration: none;}
-.pill {font-size: .75rem; font-weight: 600; padding: 2px 10px; border-radius: 999px;}
-.pill.live {background: #e3f2e8; color: #2e7d4f;} .pill.build {background: #fbeed6; color: #9a5b00;} .pill.plan {background: #ebe9e5; color: #5f676d;}
-.muted {opacity: .6;}
+.stApp {{background: {BRAND};}}
+header[data-testid="stHeader"] {{background: transparent;}}
+.block-container {{max-width: 1100px; padding-top: 2.5rem;}}
+.stApp h1, .stApp h2, .stApp h3, .stApp p, .stApp label, .stApp [data-testid="stCaptionContainer"] {{color: #ffffff;}}
+.brand {{display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 28px; text-align: center;}}
+.brand img {{width: 260px; max-width: 70vw;}}
+.brand .rule {{width: 56px; height: 1px; background: rgba(255,255,255,.55);}}
+.brand .title {{color: #fff; font-size: 1.05rem; letter-spacing: .32em; text-transform: uppercase; font-weight: 500;}}
+.brand .sub {{color: rgba(255,255,255,.75); font-size: .9rem;}}
+.stTextInput input {{background: #ffffff; color: #1d2226; border: none;}}
+.section {{color: #fff; font-size: .95rem; letter-spacing: .2em; text-transform: uppercase; font-weight: 600;
+  border-bottom: 1px solid rgba(255,255,255,.3); padding-bottom: 6px; margin: 28px 0 14px;}}
+.hub-card {{
+  background: #ffffff; color: #1d2226; border-radius: 10px; padding: 18px 20px; height: 100%;
+  border-top: 4px solid var(--stripe); display: flex; flex-direction: column; gap: 6px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.15);
+}}
+.hub-card.live {{--stripe: {BRAND};}} .hub-card.build {{--stripe: #c9a227;}} .hub-card.plan {{--stripe: #b5b9ad;}}
+.hub-card.plan, .hub-card.build {{background: #f4f5f0;}}
+.hub-head {{display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;}}
+.hub-name {{font-size: 1.1rem; font-weight: 700; line-height: 1.3; color: #1d2226;}}
+.hub-zh {{font-size: .85rem; color: #6b7064;}}
+.hub-icon {{font-size: 1.6rem;}}
+.hub-desc {{font-size: .92rem; color: #4a4f45; margin: 4px 0;}}
+.hub-tags span {{font-size: .75rem; padding: 2px 8px; margin-right: 4px; border-radius: 4px;
+  background: #eef0e8; color: {BRAND};}}
+.hub-foot {{margin-top: auto; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; font-size: .9rem;}}
+.hub-foot a {{font-weight: 700; text-decoration: none; color: #fff !important; background: {BRAND};
+  padding: 5px 14px; border-radius: 6px;}}
+.hub-foot a:hover {{background: #3d4826;}}
+.pill {{font-size: .75rem; font-weight: 600; padding: 2px 10px; border-radius: 999px;}}
+.pill.live {{background: #e6ebd9; color: {BRAND};}} .pill.build {{background: #f6edcc; color: #8a6d0b;}} .pill.plan {{background: #e7e8e3; color: #6b7064;}}
+.muted {{color: #8a8f82;}}
+.foot-note {{color: rgba(255,255,255,.7); font-size: .85rem; text-align: center; margin-top: 40px;
+  border-top: 1px solid rgba(255,255,255,.25); padding-top: 14px;}}
 </style>
 """,
     unsafe_allow_html=True,
 )
 
-st.title("🏭 Sunique Warehouse Hub")
-st.caption("仓库工具中心 · 选择你要用的应用")
+st.markdown(
+    f"""
+<div class="brand">
+  <img src="data:image/png;base64,{LOGO_B64}" alt="Sunique International">
+  <div class="rule"></div>
+  <div class="title">Warehouse Hub</div>
+  <div class="sub">仓库工具中心 · 选择你要用的应用</div>
+</div>""",
+    unsafe_allow_html=True,
+)
 
-q = st.text_input("搜索应用 Search apps", placeholder="例如：运费、订单、排程", label_visibility="collapsed").strip().lower()
+q = st.text_input("搜索应用 Search apps", placeholder="搜索应用，例如：运费、订单、排程", label_visibility="collapsed").strip().lower()
 
 
 def matches(a):
@@ -81,7 +110,7 @@ for key, title in GROUPS:
     items = [a for a in APPS if a["status"] == key and matches(a)]
     if not items:
         continue
-    st.subheader(title)
+    st.markdown(f'<div class="section">{title}</div>', unsafe_allow_html=True)
     for i in range(0, len(items), 3):
         cols = st.columns(3)
         for col, a in zip(cols, items[i : i + 3]):
@@ -91,5 +120,4 @@ for key, title in GROUPS:
 if shown == 0:
     st.info("没有匹配的应用。No apps match that search.")
 
-st.divider()
-st.caption("维护人 Kevin Li · 有问题或新需求请直接联系 Kevin。")
+st.markdown('<div class="foot-note">维护人 Kevin Li · 有问题或新需求请直接联系 Kevin</div>', unsafe_allow_html=True)
