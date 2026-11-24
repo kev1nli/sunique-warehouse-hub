@@ -1,17 +1,21 @@
 # Sunique Warehouse Hub
 
-公司仓库工具的统一入口（Streamlit）。
+One place for Sunique's warehouse apps and SOPs (Streamlit).
 
-## 文件
-- `streamlit_app.py`：门户页面
-- `apps.py`：应用清单，加新应用或改网址只改这里
-- `requirements.txt`：依赖
+Live: https://sunique-warehouse-app.streamlit.app/
 
-## 部署到 Streamlit Community Cloud
-1. 在 GitHub 新建一个仓库（例如 `sunique-warehouse-hub`），把这三个文件上传到根目录。
-2. 打开 https://share.streamlit.io ，点 **Create app**，选这个仓库，Main file 填 `streamlit_app.py`。
-3. 可以自定义网址，例如 `sunique-warehouse.streamlit.app`。
-4. 部署后在 app 的 **Settings → Sharing** 里确认是 **Public**（任何人有链接都能打开，不需要登录）。
+## Files
+- `streamlit_app.py` – the hub page
+- `apps.py` – list of apps (add an app or change a link here)
+- `sops.py` – list of SOPs
+- `sops/` – SOP PDF files
+- `logo.png`, `favicon.png` – branding
+- `requirements.txt` – dependencies
 
-## 以后更新
-在 GitHub 上编辑 `apps.py`，保存后 Streamlit 会自动重新部署。
+## Add an SOP
+1. Upload the PDF into the `sops/` folder.
+2. Add an entry to `SOPS` in `sops.py` (title, desc, category, file, updated).
+3. Commit. Streamlit redeploys automatically.
+
+## Add or update an app
+Edit `apps.py` and commit.

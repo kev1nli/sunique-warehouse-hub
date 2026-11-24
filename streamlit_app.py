@@ -5,18 +5,20 @@ from pathlib import Path
 import streamlit as st
 
 from apps import APPS
+from sops import SOPS
 
 st.set_page_config(page_title="Sunique Warehouse Hub", page_icon="favicon.png", layout="wide")
 
-BRAND = "#4E5B30"  # Sunique 主题绿
+BRAND = "#4E5B30"  # Sunique brand green
+SOP_DIR = Path(__file__).parent / "sops"
 LOGO_B64 = base64.b64encode((Path(__file__).parent / "logo.png").read_bytes()).decode()
 
 GROUPS = [
-    ("live", "可以使用 Live"),
-    ("build", "开发中 Building"),
-    ("plan", "规划中 Planned"),
+    ("live", "Available now"),
+    ("build", "In development"),
+    ("plan", "Planned"),
 ]
-LABEL = {"live": "可用", "build": "开发中", "plan": "规划中"}
+LABEL = {"live": "Live", "build": "Building", "plan": "Planned"}
 
 st.markdown(
     f"""
@@ -56,6 +58,22 @@ header[data-testid="stHeader"] {{background: transparent;}}
 .muted {{color: #8a8f82;}}
 .foot-note {{color: rgba(255,255,255,.7); font-size: .85rem; text-align: center; margin-top: 40px;
   border-top: 1px solid rgba(255,255,255,.25); padding-top: 14px;}}
+[data-testid="stTab"] {{color: rgba(255,255,255,.7); padding: 6px 4px;}}
+[data-testid="stTab"] p {{color: inherit !important; font-size: 1.1rem; font-weight: 700; letter-spacing: .04em;}}
+[data-testid="stTab"][aria-selected="true"] {{color: #ffffff;}}
+[role="tablist"] {{gap: 18px; border-bottom: 1px solid rgba(255,255,255,.3);}}
+.react-aria-SelectionIndicator {{background-color: #ffffff !important; height: 3px !important;}}
+.sop-card {{background: #ffffff; border-radius: 10px; padding: 16px 20px; box-shadow: 0 4px 14px rgba(0,0,0,.15);
+  display: flex; flex-direction: column; gap: 4px; color: #1d2226;}}
+.sop-title {{font-weight: 700; font-size: 1.05rem;}}
+.sop-meta {{font-size: .8rem; color: #6b7064;}}
+.sop-desc {{font-size: .92rem; color: #4a4f45;}}
+.empty-box {{background: rgba(255,255,255,.08); border: 1px dashed rgba(255,255,255,.45); border-radius: 10px;
+  padding: 36px 20px; text-align: center; color: #fff;}}
+.empty-box b {{display: block; font-size: 1.1rem; margin-bottom: 6px;}}
+.empty-box span {{color: rgba(255,255,255,.75); font-size: .92rem;}}
+.stDownloadButton button {{background: {BRAND}; color: #fff; border: none; font-weight: 600;}}
+.stDownloadButton button:hover {{background: #3d4826; color: #fff;}}
 </style>
 """,
     unsafe_allow_html=True,
@@ -67,36 +85,36 @@ st.markdown(
   <img src="data:image/png;base64,{LOGO_B64}" alt="Sunique International">
   <div class="rule"></div>
   <div class="title">Warehouse Hub</div>
-  <div class="sub">仓库工具中心 · 选择你要用的应用</div>
+  <div class="sub">Sunique warehouse tools and SOPs in one place</div>
 </div>""",
     unsafe_allow_html=True,
 )
 
-q = st.text_input("搜索应用 Search apps", placeholder="搜索应用，例如：运费、订单、排程", label_visibility="collapsed").strip().lower()
+q = st.text_input("Search", placeholder="Search apps and SOPs, e.g. freight, orders, pickup", label_visibility="collapsed").strip().lower()
 
 
 def matches(a):
     if not q:
         return True
-    text = " ".join([a["name"], a["zh"], a["desc"], *a["tags"]]).lower()
+    text = " ".join([a["name"], a["desc"], *a["tags"]]).lower()
     return q in text
 
 
 def card(a):
     e = html.escape
     if a["url"]:
-        foot = f'<a href="{e(a["url"])}" target="_blank">打开 Open ↗</a>'
+        foot = f'<a href="{e(a["url"])}" target="_blank">Open ↗</a>'
     elif a["status"] == "live":
-        foot = '<span class="muted">链接待添加</span>'
+        foot = '<span class="muted">Link coming soon</span>'
     elif a["status"] == "build":
-        foot = '<span class="muted">正在开发，敬请期待</span>'
+        foot = '<span class="muted">Coming soon</span>'
     else:
-        foot = '<span class="muted">下一步计划</span>'
+        foot = '<span class="muted">Next up</span>'
     tags = "".join(f"<span>{e(t)}</span>" for t in a["tags"])
     return f"""
 <div class="hub-card {a['status']}">
   <div class="hub-head">
-    <div><div class="hub-name">{e(a['name'])}</div><div class="hub-zh">{e(a['zh'])}</div></div>
+    <div class="hub-name">{e(a['name'])}</div>
     <div class="hub-icon">{a['icon']}</div>
   </div>
   <div class="hub-desc">{e(a['desc'])}</div>
@@ -105,19 +123,56 @@ def card(a):
 </div>"""
 
 
-shown = 0
-for key, title in GROUPS:
-    items = [a for a in APPS if a["status"] == key and matches(a)]
-    if not items:
-        continue
-    st.markdown(f'<div class="section">{title}</div>', unsafe_allow_html=True)
-    for i in range(0, len(items), 3):
-        cols = st.columns(3)
-        for col, a in zip(cols, items[i : i + 3]):
-            col.markdown(card(a), unsafe_allow_html=True)
-    shown += len(items)
+tab_apps, tab_sops = st.tabs(["Apps", "SOPs"])
 
-if shown == 0:
-    st.info("没有匹配的应用。No apps match that search.")
+with tab_apps:
+    shown = 0
+    for key, title in GROUPS:
+        items = [a for a in APPS if a["status"] == key and matches(a)]
+        if not items:
+            continue
+        st.markdown(f'<div class="section">{title}</div>', unsafe_allow_html=True)
+        for i in range(0, len(items), 3):
+            cols = st.columns(3)
+            for col, a in zip(cols, items[i : i + 3]):
+                col.markdown(card(a), unsafe_allow_html=True)
+        shown += len(items)
+    if shown == 0:
+        st.markdown('<div class="empty-box"><b>No apps match your search</b><span>Try a different word.</span></div>', unsafe_allow_html=True)
 
-st.markdown('<div class="foot-note">维护人 Kevin Li · 有问题或新需求请直接联系 Kevin</div>', unsafe_allow_html=True)
+
+def sop_matches(s):
+    if not q:
+        return True
+    return q in " ".join([s.get("title", ""), s.get("desc", ""), s.get("category", "")]).lower()
+
+
+with tab_sops:
+    st.markdown('<div class="section">Standard operating procedures</div>', unsafe_allow_html=True)
+    if not SOPS:
+        st.markdown(
+            '<div class="empty-box"><b>SOPs coming soon</b>'
+            "<span>Warehouse and sales procedures will be posted here as PDFs.</span></div>",
+            unsafe_allow_html=True,
+        )
+    else:
+        items = [s for s in SOPS if sop_matches(s)]
+        if not items:
+            st.markdown('<div class="empty-box"><b>No SOPs match your search</b><span>Try a different word.</span></div>', unsafe_allow_html=True)
+        for i in range(0, len(items), 2):
+            cols = st.columns(2)
+            for col, s in zip(cols, items[i : i + 2]):
+                e = html.escape
+                meta = " · ".join(x for x in [s.get("category", ""), f"Updated {s['updated']}" if s.get("updated") else ""] if x)
+                col.markdown(
+                    f'<div class="sop-card"><div class="sop-title">📄 {e(s["title"])}</div>'
+                    f'<div class="sop-meta">{e(meta)}</div><div class="sop-desc">{e(s.get("desc", ""))}</div></div>',
+                    unsafe_allow_html=True,
+                )
+                path = SOP_DIR / s["file"]
+                if path.exists():
+                    col.download_button("Download PDF", path.read_bytes(), file_name=s["file"], mime="application/pdf", key=f"sop-{s['file']}")
+                else:
+                    col.caption(f"File not found: sops/{s['file']}")
+
+st.markdown('<div class="foot-note">Maintained by Kevin Li · Questions or requests? Contact Kevin.</div>', unsafe_allow_html=True)
