@@ -35,8 +35,11 @@ header[data-testid="stHeader"] {{background: transparent;}}
 .stTextInput input {{background: #ffffff; color: #1d2226; border: none;}}
 .section {{color: #fff; font-size: .95rem; letter-spacing: .2em; text-transform: uppercase; font-weight: 600;
   border-bottom: 1px solid rgba(255,255,255,.3); padding-bottom: 6px; margin: 28px 0 14px;}}
+.hub-grid {{display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch;}}
+@media (max-width: 900px) {{.hub-grid {{grid-template-columns: repeat(2, minmax(0, 1fr));}}}}
+@media (max-width: 600px) {{.hub-grid {{grid-template-columns: 1fr;}}}}
 .hub-card {{
-  background: #ffffff; color: #1d2226; border-radius: 10px; padding: 18px 20px; height: 100%;
+  background: #ffffff; color: #1d2226; border-radius: 10px; padding: 18px 20px; height: 100%; box-sizing: border-box;
   border-top: 4px solid var(--stripe); display: flex; flex-direction: column; gap: 6px;
   box-shadow: 0 4px 14px rgba(0,0,0,.15);
 }}
@@ -111,16 +114,14 @@ def card(a):
     else:
         foot = '<span class="muted">Next up</span>'
     tags = "".join(f"<span>{e(t)}</span>" for t in a["tags"])
-    return f"""
-<div class="hub-card {a['status']}">
-  <div class="hub-head">
-    <div class="hub-name">{e(a['name'])}</div>
-    <div class="hub-icon">{a['icon']}</div>
-  </div>
-  <div class="hub-desc">{e(a['desc'])}</div>
-  <div class="hub-tags">{tags}</div>
-  <div class="hub-foot">{foot}<span class="pill {a['status']}">{LABEL[a['status']]}</span></div>
-</div>"""
+    return (
+        f'<div class="hub-card {a["status"]}">'
+        f'<div class="hub-head"><div class="hub-name">{e(a["name"])}</div><div class="hub-icon">{a["icon"]}</div></div>'
+        f'<div class="hub-desc">{e(a["desc"])}</div>'
+        f'<div class="hub-tags">{tags}</div>'
+        f'<div class="hub-foot">{foot}<span class="pill {a["status"]}">{LABEL[a["status"]]}</span></div>'
+        "</div>"
+    )
 
 
 tab_apps, tab_sops = st.tabs(["Apps", "SOPs"])
@@ -131,11 +132,8 @@ with tab_apps:
         items = [a for a in APPS if a["status"] == key and matches(a)]
         if not items:
             continue
-        st.markdown(f'<div class="section">{title}</div>', unsafe_allow_html=True)
-        for i in range(0, len(items), 3):
-            cols = st.columns(3)
-            for col, a in zip(cols, items[i : i + 3]):
-                col.markdown(card(a), unsafe_allow_html=True)
+        cards = "".join(card(a) for a in items)
+        st.markdown(f'<div class="section">{title}</div><div class="hub-grid">{cards}</div>', unsafe_allow_html=True)
         shown += len(items)
     if shown == 0:
         st.markdown('<div class="empty-box"><b>No apps match your search</b><span>Try a different word.</span></div>', unsafe_allow_html=True)
